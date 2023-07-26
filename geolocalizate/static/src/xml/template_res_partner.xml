@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+   <template>
+    
+    <t t-name="geolocalizate.Golocalizate" owl="1">
+        <div class="row">
+            estamo aqui
+        </div>
+    </t>
+    
+   </template>   
+</odoo>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="organizacion_centro_occidente" model="organizacion.admp">
+            <field name="name">CENTRO OCCIDENTE</field>
+        </record>
+        <record id="organizacion_valencia" model="organizacion.admp">
+            <field name="name">VALENCIA</field>
+        </record>
+        <record id="organizacion_caracas" model="organizacion.admp">
+            <field name="name">CARACAS</field>
+        </record>
+        <record id="organizacion_barcelona" model="organizacion.admp">
+            <field name="name">BARCELONA</field>
+        </record>
+        <record id="organizacion_maracaibo" model="organizacion.admp">
+            <field name="name">MARACAIBO</field>
+        </record>
+        <record id="organizacion_oficina_araure" model="organizacion.admp">
+            <field name="name">OFICINA ARAURE</field>
+        </record>
+</odoo>

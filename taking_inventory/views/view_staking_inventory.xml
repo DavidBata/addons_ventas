@@ -1,0 +1,78 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="taking_inventory.list">
+      <field name="name">taking_inventory list</field>
+      <field name="model">taking.inventory</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"></field>
+          <!-- <field name="taking_inventory_line_ids"></field> -->
+          <field name="partner_id"></field>
+          <field name="inventory_date"></field>
+          <field name="sale_order_id"></field>
+          <field name="description"></field>
+      
+        </tree>
+      </field>
+    </record>
+    <record id="taking_inventory_view_form" model="ir.ui.view">
+      <field name="name">taking.inventory.view.form</field>
+      <field name="model">taking.inventory</field>
+      <field name="arch" type="xml">
+        <form >
+          <sheet>
+            <div class="oe_title">
+              <h1 class="mt0">
+                  <field name="name" readonly="1"/>
+              </h1>
+            </div>
+            <group>
+              <group>
+                <field name="partner_id"></field>
+                <field name="inventory_date"></field>
+                <field name="description"></field>
+              </group>
+
+              <group>
+                <field name="sale_order_id"></field> 
+                
+              </group>
+            </group>
+            <notebook>
+              <page  string="Inventario Productos">
+                <field name="taking_inventory_line_ids" widget="one2many" edit="True"  >
+                  <tree editable="bottom">
+                    <field name="product_id" 
+                    edit="True"
+                    ></field>
+                    <field name="quantity" edit="True"></field>
+                    <field name="medida" edit="True"></field>
+                    <field name="taking_inventory_id" readonly="1"></field>
+                  </tree>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="taking_inventory_action_window">
+      <field name="name">Toma de Inventario Cliente</field>
+      <field name="res_model">taking.inventory</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+    <!-- Top menu item -->
+
+    <menuitem name="Toma de Inventario" id="taking_inventory_menu" parent="sale.sale_menu_root" action="taking_inventory_action_window"/>
+
+  
+  </data>
+</odoo>

@@ -1,0 +1,29 @@
+<odoo>
+  <data>
+    <record id="res_partner_geolocalizate_inherit" model="ir.ui.view">
+      <field name="name">res.partner.geolocalizate.view.form.inherit</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//form" position="inside">
+          <header>
+            <button string="Geolocalizate" name="geolocalizate" type="object" class="oe_highlight"/>
+          </header>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="action_gelocalizate_client" model="ir.actions.client">
+      <field name="name">GeoLocalizate</field>
+      <field name="tag">geolocalizate.Golocalizate</field>
+      <!-- <field name="target">main</field> -->
+    </record>
+    <menuitem
+      id="geolocalizate_menu"
+      name="Gelocalizate Dashboard"
+      action="action_gelocalizate_client"
+      parent="contacts.res_partner_menu_contacts"
+      sequence="10"/>
+
+  </data>
+</odoo>

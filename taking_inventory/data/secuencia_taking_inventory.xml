@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <record id="taking_inventory_sequence" model="ir.sequence">
+        <field name="name">Taking Inventory Sequence</field>
+        <field name="code">taking.inventory.sequence</field>
+        <field name="prefix">InvCli-%(month)s-%(day)s-%(year)s</field>
+        <field eval="1" name="number_next" />
+        <field eval="1" name="number_increment"/>
+        <field eval="True" name="use_date_range" />
+        <field name="padding">4</field>
+    </record>>
+        
+    
+
+    
+</odoo>

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_taking_inventory,taking_inventory,model_taking_inventory,base.group_user,1,1,1,1
+access_taking_inventory_line,taking_inventory_line,model_taking_inventory_line,base.group_user,1,1,1,1
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="organizacion_admp_view_tree" model="ir.ui.view">
+        <field name="name">organizacion.admp.view.tree</field>
+        <field name="model">organizacion.admp</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name"></field>
+                <field name="country_id"></field>
+                <field name="stated_id"></field>
+            </tree>
+        </field>
+    </record>
+
+    <record id="organizacion_admp_view_form" model="ir.ui.view">
+        <field name="name">organizacion.admp.view.form</field>
+        <field name="model">organizacion.admp</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"></field>
+                            <field name="country_id"></field>
+                            <field name="stated_id"></field>
+                        </group>   
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="organizacion_admp_action" model="ir.actions.act_window">
+        <field name="name">Organizacion</field>
+        <field name="res_model">organizacion.admp</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_organizacion"
+        name="Organizaciones Adempiere"
+        action="organizacion_admp_action"
+        parent="contacts.res_partner_menu_contacts"
+        sequence="10"/>
+</odoo>
