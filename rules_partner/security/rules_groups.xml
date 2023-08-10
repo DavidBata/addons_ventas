@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- <record model="ir.module.category" id="vender_partner_agg_comercial">
+        <field name="name">Permiso Contactos</field>
+        <field name="description">Pemiso Para Mostrar Contactos</field>
+        <field name="sequence">40</field>
+    </record>
+     -->
+ 
+    
+    <record id="group_vender_partner_comercial_group" model="res.groups">
+        <field name="name">Vendedor</field>
+        <!-- <field name="category_id" ref="vender_partner_agg_comercial"/> -->
+        <!-- <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/> -->
+    </record>
+
+    <record id="model_res_partner_vendedor_rule" model="ir.rule">
+        <field name="name">Vendedor-RDV</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="groups" eval="[(4, ref('group_vender_partner_comercial_group'))]"/>
+        <field name="global" eval="True"/>
+        <field name="perm_read" eval="True" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="domain_force">['|',('partner_share', '=', False),('user_id','=',user.id)]</field>
+        <field name="active" eval="True" />
+    </record>
+  
+</odoo>

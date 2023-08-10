@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- <record id="res_parnet_view_search_inherit_usuario" model="ir.ui.view">
+        <field name="name">res.parnet.view.search.usuario.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="replace">
+                <separador/>
+                <filter string="My Cientes" name="user_id" help="My Clientes"  domain="[('user_id', '=', uid)]"/>
+                <filter string="My Cientes" name="user_id" context="{'user_id': uid}"/>
+                <filter name="user_id" string="My Cientes"  domain="[('used','=','user_id')]"/>
+            </xpath>
+        </field>
+    </record> -->
+</odoo>

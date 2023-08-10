@@ -1,75 +1,58 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry"
+import { formView } from "@web/views/form/form_view"
+import { FormController } from "@web/views/form/form_controller"
+import {orm_service} from '@web/core/orm_service'
+import { useService } from "@web/core/utils/hooks"
+import fieldRegistry from 'web.field_registry';
+import { FieldChar } from 'web.basic_fields';
 
-const { Component } = owl
+class ResPartnerFormController extends FormController {
+    setup(){
+        super.setup()
+        this.rpc = useService("rpc");
+        this.orm = useService("orm");
+        console.log("This is res partner form controller")
+        // var  ubicacion_data = null
+        // this.action = useService("action")
+        
+    }
+ 
+  ubicacionDomain(id){
+    navigator.geolocation.getCurrentPosition(position => {
+        const {latitude,longitude} = position.coords;
+          let cadena = `latitud: ${latitude}: longitud: ${longitude}`;
+         var  ubicacion_data= cadena;
+          console.log(ubicacion_data);
+          var rpc = require('web.rpc')
+          var metodo =`geolocalizateme(${ubicacion_data})`
+          // orm_service._rpcService
+          
+          rpc.query({ 
+            model: 'res.partner', 
+            method: "geolocalizateme",
+            args: [[id],[ubicacion_data]], 
+          }).then(function (datos) {
+            if (datos=="ok") {
+              console.log(datos)
+              window.location.reload()
+            }
+            
 
-export class Geolicalizate extends Component {
+          }).catch( function (err) {console.log(err)}); 
+          
+        }); 
+    
+      }
+  
+ }
 
-  setup() {
-    console.log("Entering Geolicaliz")
-  }
+ResPartnerFormController.template = "geolocalizate.ResPartnerFormView"
+
+export const resPartnerFormView = {
+    ...formView,
+    Controller: ResPartnerFormController,
 }
-Geolicalizate.template="geolocalizate.Golocalizate"
 
-registry.category("actions").add("geolocalizate.Golocalizate",Geolicalizate)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // import { memoize } from "@web/core/utils/functions";
-
-// import { registry } from "./core/registry";
-
-// const GeolocalizateJs = {
-//     dependencies: ["notification"],
-//     start(env, { notification }) {
-//         let counter = 1;
-//         setInterval(() => {
-//             notification.add(`Tick Tock ${counter++}`);
-//         }, 5000);
-//     }
-// };
-// serviceRegistry.add("GeolocalizateJs", GeolocalizateJs);
-
-
-// odoo.define('res.partner', function (require) {
-//     "use strict";
-//     if (navigator.geolocation) {
-//         navigator.geolocation.getCurrentPosition(showPosition);
-//       } else {
-//         //document.getElementById("demo").innerHTML =
-//         console.log("Geolocation is not supported by this browser.");
-//       }
-//       function showPosition(position) {
-//         // document.getElementById("demo").innerHTML =
-//         // "Latitude: " + position.coords.latitude + "<br>" +
-//         // "Longitude: " + position.coords.longitude;
-//         var postion = position.coords.latitude + ',' + position.coords.longitude
-//         console.log(postion)
-//         return postion
-//       }
-// });
-// showPosition.template = "geolocalizate.geolocalizate_template";
-
-// registry.category("fields").add("sales_team_progressbar", SaleProgressBarField);
+registry.category("views").add("res_partner_form_view", resPartnerFormView)

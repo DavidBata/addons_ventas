@@ -10,7 +10,18 @@ class ResPartnerGeolicalizate(models.Model):
         string='gelocalizate',
     )
     
-    def geolocalizate(self):
-
-        raise ValidationError('geolocalizate')
-        # return self.gelocalizat
+        
+    def geolocalizateme(self,geo=''):
+        self.gelocalizateee(geo=geo)
+        msg="ok"
+        return msg
+  
+        
+    def gelocalizateee(self,geo=False):
+        if geo:
+            geoloca=""
+            for x in geo:
+                geoloca += x
+            self.gelocalizate= geoloca
+        else:
+            self.gelocalizate=str(geo)
