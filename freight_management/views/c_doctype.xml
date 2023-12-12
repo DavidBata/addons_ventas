@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="c_doctype_view_tree" model="ir.ui.view">
+        <field name="name">c.doctype.view.tree</field>
+        <field name="model">c.doctype</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name"></field>
+                <field name="c_doctype_id"></field>
+                <field name="organizacion_id"></field>
+
+            </tree>
+        </field>
+    </record>
+
+    <record id="c_doctype_view_form" model="ir.ui.view">
+        <field name="name">c.doctype.view.form</field>
+        <field name="model">c.doctype</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"></field>
+                            <field name="c_doctype_id"></field>
+                            <field name="organizacion_id"></field>
+                        </group>   
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="c_doctype_action" model="ir.actions.act_window">
+        <field name="name">c_doctype</field>
+        <field name="res_model">c.doctype</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_c_doctype"
+        name="Tipo Documento Adempiere"
+        action="c_doctype_action"
+        parent="contacts.res_partner_menu_contacts"
+        sequence="10"/>
+</odoo>

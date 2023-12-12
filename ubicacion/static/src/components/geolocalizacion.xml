@@ -1,0 +1,9 @@
+<templates>
+    <t t-name="ubicacion.UbicacionField" owl="1">
+        <div >           
+              <input type="text" class="o_ubicacion_field" id="customUbicacion" t-att-value="state.ubicacion_data" t-model="state.ubicacion_data" t-ref="input" t-on-focus="(ev)=>this.props.update(ev.target.value)" t-on-change="(ev)=>this.props.update(ev.target.value)"/>
+              <button id="customUbicacion1" class="btn btn-primary" t-on-click="focusInput" t-on-mousedown="ubicacionDomain">Ubicación</button>         
+              
+        </div>
+    </t>
+</templates>

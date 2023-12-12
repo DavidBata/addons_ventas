@@ -22,6 +22,4 @@ class FreightOrder(models.Model):
     unidad_bulto = fields.Integer(
         string='Unidad Por Bulto',
     )
-
-    
     

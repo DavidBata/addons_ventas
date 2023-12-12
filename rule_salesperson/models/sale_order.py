@@ -9,10 +9,10 @@ class SaleOrderInheritRuleVendedorStandar(models.Model):
 
     def import_adempier_salesperson_regular(self):
         for rec in self:
-            web_service = self.env['web.service.eng'].search([("code", "=", "IANCARINA_QA")])
+            web_service = self.env['web.service.eng'].search([("code", "=", "IANCARINA C.A_QA")])
             user = self.env.user.login
             ad_client="<_0:field column=\"AD_Client_ID\">\r\n   <_0:val>1000000</_0:val>\r\n</_0:field>\r\n "
-            user_admpiere = web_service.consul_user(code=user,ad_client=ad_client, url=web_service.url)
+            user_admpiere = web_service.consul_user(code=user, url=web_service.url)
             # raise ValidationError(user_admpiere)  
 
             # id de partner adempiere
@@ -20,14 +20,18 @@ class SaleOrderInheritRuleVendedorStandar(models.Model):
 
             # identificar la direccion de entrega
             direcion_entrega = web_service.direccion_entrega(cb_partner_id=admpiere_partner_id["partner"],name_direccion=rec.partner_id.city.upper(),url=web_service.url)
-
+            org_base=web_service.consult_typedocumet_base(name='Sales Order',url=web_service.url)
+            org_cliente=web_service.org_cliente_despacho(org_name=rec.organizacion_id.name ,url=web_service.url)
             # raise ValidationError(direcion_entrega)
             c_order_admpiere = web_service.web_service_c_order(
                     user=user,
                     clave=user,
                     ClientID="1000000",
                     RoleID= user_admpiere["rol_id"],
-                    OrgID=user_admpiere["ad_org_id"],
+
+                    OrgID= org_cliente[0] ,
+                    
+                    
                     WarehouseID=user_admpiere["almacen"],
                     C_BPartner_ID= admpiere_partner_id["partner"],
                     C_Campaign_ID="1000000",
@@ -43,13 +47,17 @@ class SaleOrderInheritRuleVendedorStandar(models.Model):
             actulizacio=web_service.update_direccion_entrega(order_id=c_order_admpiere[0],C_BPartner_Location_ID=direcion_entrega,url=web_service.url)
 
             lista_productos_registrados=[]    
-      
             for line in rec.order_line:
+                # codes= [line.product_id.default_code]
                 QtyEntered= line.product_uom_qty
                 PriceEntered=line.price_unit
                 PriceActual=line.price_unit
-                producto_ad_id=web_service.consul_id_product( code=line.product_id.default_code, url=web_service.url)
-                create_order_line = web_service.create_order_line(
+                
+                
+                producto_ad_id=web_service.consul_id_product(code=line.product_id.default_code, url=web_service.url)
+                # raise ValidationError(producto_ad_id[0])  
+                
+                create_order_line = web_service.create_order_line_salesperson(
                     order_id=c_order_admpiere[0],
                     clave=user,
                     user=user,
@@ -65,7 +73,7 @@ class SaleOrderInheritRuleVendedorStandar(models.Model):
             
             # raise ValidationError(lista_productos_registrados)
             if  len(rec)>=1 and int(lista_productos_registrados[0])>1:
-                rec.state="done"
+                rec.state="import_salesperson"
                 return {
                     "type": "ir.actions.client",
                     "tag": "display_notification",

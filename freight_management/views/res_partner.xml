@@ -11,12 +11,17 @@
                     <field name="responsable_id" string="Responsable" groups="sales_team.group_sale_salesman_all_leads"></field>
                     <field name="is_opl"></field>
                     <field name="activity_user_id" invisible="1"></field>
+
                 </xpath>
                 <xpath expr="//div[@class='o_row']" position="after">
                     
                     <label for='organizacion_id'>Organización</label>
-                    
                     <field name="organizacion_id"></field>
+
+                    <!-- <field name="types_document"></field> -->
+                    <!-- <button name="bottttooonnn" type="object" string="HOLA"></button> -->
+                    
+                    
                 </xpath>
                 
             </field>

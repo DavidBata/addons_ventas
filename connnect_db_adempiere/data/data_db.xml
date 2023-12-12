@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+          <record id="record_consult_adempiere_iancarina" model="connnect.adempiere">
+            <field name="name">Consulta Adempiere SQl </field>
+            <field name="description">Es el Registro para Consultar cosas puntuiales en adempiere segun tipo de compañia</field>
+            <field name="database">adempiere</field>
+            <field name="user">adempiere</field>
+            <field name="password">ad3mp13r3sf1d4.*</field>
+            <field name="host">losroques</field>
+            <field name="port">5434</field>
+            <field name="company_id">1</field>
+          </record>
+    </data>
+</odoo>

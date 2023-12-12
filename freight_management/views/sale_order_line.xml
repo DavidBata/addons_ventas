@@ -21,7 +21,8 @@
                 <field name="freight_order_id"   optional="show" string="Orden de Carga"/>
                 <field name="validity_date"  optional="hide" string="Fecha Prometida"/>
                 <field name="back_order_id"  optional="hide"></field>
-                <field name="delivery_address_id"  optional="hide"/>
+                <!-- <field name="delivery_address_id"  optional="hide"/> -->
+                <field name="delivery_address" optional="hide" ></field>
             </xpath>
 
             <xpath expr="//field[@name='order_id']" position="after">
@@ -42,14 +43,18 @@
                 <attribute name="widget">many2one_avatar_user</attribute>
             </xpath>
             <xpath expr="//field[@name='product_uom_qty']" position="after">
-                <field name="weight_total_line" string ="Peso Linea Kg" optional="show"></field>
+                <field name="weight_total_line" sum="TotalKg" string ="Peso Linea Kg" optional="show"></field>
+            </xpath>
+
+            <xpath expr="//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="sum">TotalBultos</attribute>
             </xpath>
             
             <xpath expr="//field[@name='qty_invoiced']" position="after">
                 <field name="currency_id"/>
                 <field name="costo_unit" string="Precio Unitario"/>
                 <field name="list_price_limit"/>
-                <field name="list_price" string="Precio Bulto"/>
+                <field name="price_unit" string="Precio Bulto"/>
             </xpath>
             
             

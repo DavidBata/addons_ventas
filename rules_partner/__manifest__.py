@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 {
     'name': 'Reglas Partner',
     'version': '1.0',

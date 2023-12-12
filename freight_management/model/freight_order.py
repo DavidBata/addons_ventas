@@ -152,7 +152,7 @@ class FreightOrder(models.Model):
                         _("Una o mas Lineas de Venta Ya Tienen Orden de Carga")
                     )
 
-            if rec.truck_id and rec.accumulator_weight <= rec.truck_weight:
+            if rec.truck_id and rec.accumulator_weight <= (rec.truck_weight + rec.truck_weight * 0.10):
                 rec.state = "draft"
             else:
                 raise ValidationError(
@@ -339,116 +339,126 @@ class FreightOrder(models.Model):
             # raise ValidationError(rec)
             rifs = []
             record = []
-            for line in rec.sale_order_line_ids:
-                if line.vat not in rifs:
-                    admpiere_partner_id = rec.crear_c_order_in_id.consul_cb_partner(CI=line.vat, url=rec.crear_c_order_in_id.url)
-                    
-                    # raise ValidationError(admpiere_partner_id["partner"])
-                    partnet_adem = admpiere_partner_id["partner"]
-                    user_admpiere = rec.crear_c_order_in_id.consul_user(code=rec.env.user.login,url=rec.crear_c_order_in_id.url)
-                    
-                    # raise ValidationError(user_admpiere["rol_id"] )
-                    # LOGUE DE USUARIO CREDENCIALES
-                    user = user_admpiere["value"]
-                    clave = user_admpiere["value"]
-                    client_id = "1000000"
-                    role_id = user_admpiere["rol_id"]
-                    org_id = user_admpiere["ad_org_id"]
-                    WarehouseID = user_admpiere["almacen"]
+            if rec.crear_c_order_in_id.company_id.name == 'IANCARINA':
+                for line in rec.sale_order_line_ids:
+                    if line.vat not in rifs:
+                        # VARIABLES PARA CREAR LA ORDEN DE VENTA
+                        admpiere_partner_id = rec.crear_c_order_in_id.consul_cb_partner(CI=line.vat, url=rec.crear_c_order_in_id.url)
+                        org_base=rec.crear_c_order_in_id.consult_typedocumet_base(name='Sales Order',url=rec.crear_c_order_in_id.url)
+                        org_cliente=rec.crear_c_order_in_id.org_cliente_despacho(org_name=line.order_partner_id.organizacion_id.name,url=rec.crear_c_order_in_id.url)
+                        partnet_adem = admpiere_partner_id["partner"]
+                        user_admpiere = rec.crear_c_order_in_id.consul_user(code=rec.env.user.login,url=rec.crear_c_order_in_id.url)
+                        # raise ValidationError(user_admpiere["rol_id"] )
+                        almacen=rec.crear_c_order_in_id.consul_almacen_user(org_id=org_cliente[0], url=rec.crear_c_order_in_id.url)
+                        # LOGUE DE USUARIO CREDENCIALES
+                        user = user_admpiere["value"]
+                        clave = user_admpiere["value"]
+                        client_id = "1000000"
+                        role_id = user_admpiere["rol_id"]
+                        org_id = org_cliente[0]
+                        
+                        WarehouseID = almacen[0]
+                        DocTypeTarget= line.document_type
+                        direcion_entrega = self.direccion_entrega(cb_partner_id=partnet_adem,name_direccion=line.order_partner_id.city.upper(),url=rec.crear_c_order_in_id.url)
+                        # raise ValidationError(direcion_entrega)
+                        ad_client = "1000000"
+                
+                        c_order_admpiere = rec.crear_c_order_in_id.web_service_c_order(
+                            user=user,
+                            clave=clave,
+                            ClientID=client_id,
+                            RoleID=role_id,
+                            OrgID=org_id,
+                            WarehouseID=WarehouseID,
+                            C_BPartner_ID=partnet_adem,
+                            C_Campaign_ID="1000000",
+                            C_Project_ID="1000018",
+                            M_Warehouse_ID=WarehouseID,
+                            Description= f'''WebService {rec.name} Requiere Caleta ({line.order_id_caleta}) Requiere Monta Carga ({line.order_id_mota_carga})''',
+                            C_DocTypeTarget_ID=DocTypeTarget,
+                            AD_Client_ID=ad_client,
+                            url=rec.crear_c_order_in_id.url,
+                        )
+                        # raise ValidationError(c_order_admpiere)  
+                        lista_precio = self.update_price_list(order_id=c_order_admpiere[0], M_PriceList_ID='1000078',url=rec.crear_c_order_in_id.url)
+                        actulizacio=self.update_direccion_entrega(order_id=c_order_admpiere[0],C_BPartner_Location_ID=direcion_entrega,url=rec.crear_c_order_in_id.url)
+
+                        
+                        record += c_order_admpiere
+                        rifs.append(line.vat)
+                
+                register = dict(zip(rifs, record))
+                register_comp = dict(zip(record, rifs))
+                
+                # raise ValidationError(register.items())
+                create_order_line = rec.create_order_line(
+                    order_id=register,
+                    clave=clave,
+                    user=user,
+                    ClientID=client_id,
+                    RoleID=role_id,
+                    OrgID= org_id,
+                    WarehouseID=WarehouseID,
+                    url=rec.crear_c_order_in_id.url,
+                )
+                # raise ValidationError(create_order_line)
+
+                for id_orderline in create_order_line:
+                    orederline_id = self.get_data_response(xml=id_orderline)
+                    updata_orf = self.update_organization_c_orderline(url=rec.crear_c_order_in_id.url,id_orderline=orederline_id[0],org_id=org_id)
+                    # raise ValidationError(_(updata_orf))
+
+
+
+                for respon in create_order_line:
+                    reco_id = rec.get_data_response(xml=respon)
+                    is_int = int(reco_id[0])
+                    if type(is_int) is int:
+                        succ = True
+                    else:
+                        succ = False
+                if succ:
+                    rec.state = "import_ademp"
+
+                    # raise ValidationError(_("Exito, En Creacion de Ordenes de Venta"))
+                else:
+                    raise ValidationError(
+                        _("Comunicate con el Administrador, Algo Salio Mal")
+                    )
+            else:
+                for line in rec.sale_order_line_ids:
+                    data_header_order_sale = self.export_other_companies() 
                     DocTypeTarget= line.document_type
-                    direcion_entrega = self.direccion_entrega(cb_partner_id=partnet_adem,name_direccion=line.order_partner_id.city.upper(),url=rec.crear_c_order_in_id.url)
-                      
-                    # raise ValidationError(WarehouseID)  
-                    # LOGUE DE USUARIO CREDENCIALES
-                    # Crando LA ORDEN DE VENTA EN ADEMPIERE
-                    ad_client = "1000000"
-            
-                    c_order_admpiere = rec.crear_c_order_in_id.web_service_c_order(
-                        user=user,
-                        clave=clave,
-                        ClientID=client_id,
-                        RoleID=role_id,
-                        OrgID=org_id,
-                        WarehouseID=WarehouseID,
-                        C_BPartner_ID=partnet_adem,
+                    # almacen=rec.crear_c_order_in_id.consul_almacen_user(org_id=data_header_order_sale['org_id_client'], url=rec.crear_c_order_in_id.url)
+                    c_order_admpiere=rec.crear_c_order_in_id.web_service_c_order(
+                        user=data_header_order_sale['code_usuario'],
+                        clave=data_header_order_sale['code_usuario'],
+                        ClientID='1000000',
+                        RoleID=data_header_order_sale['rol_usuario'],
+                        OrgID=data_header_order_sale['org_id_usuario'],
+                        WarehouseID='0',
+                        C_BPartner_ID=data_header_order_sale['c_bpartner_id'],
                         C_Campaign_ID="1000000",
                         C_Project_ID="1000018",
-                        M_Warehouse_ID=WarehouseID,
-                        Description=rec.name +' '+ "Import_Ws ",
-                    
-                        C_DocTypeTarget_ID=DocTypeTarget,
-                        AD_Client_ID=ad_client,
+                        M_Warehouse_ID='0',
+                        Description= f'''WebService {rec.name} Requiere Caleta ({line.order_id_caleta}) Requiere Monta Carga ({line.order_id_mota_carga})''',
+                        C_DocTypeTarget_ID='4000483',
+                        AD_Client_ID='1000000',
                         url=rec.crear_c_order_in_id.url,
                     )
-                    # raise ValidationError(c_order_admpiere)  
-                    
-                    actulizacio=self.update_direccion_entrega(order_id=c_order_admpiere[0],C_BPartner_Location_ID=direcion_entrega,url=rec.crear_c_order_in_id.url)
+                    raise ValidationError(c_order_admpiere)  
 
-                    
-                    record += c_order_admpiere
-                    rifs.append(line.vat)
-            
-            register = dict(zip(rifs, record))
-            register_comp = dict(zip(record, rifs))
-            
-            # raise ValidationError(register.items())
-            create_order_line = rec.create_order_line(
-                order_id=register,
-                clave=clave,
-                user=user,
-                ClientID=client_id,
-                RoleID=role_id,
-                OrgID=org_id,
-                WarehouseID=WarehouseID,
-                url=rec.crear_c_order_in_id.url,
-            )
-
-            
-            for respon in create_order_line:
-                reco_id = rec.get_data_response(xml=respon)
-                is_int = int(reco_id[0])
-                if type(is_int) is int:
-                    succ = True
-                else:
-                    succ = False
-            if succ:
-                rec.state = "import_ademp"
-
-                # raise ValidationError(_("Exito, En Creacion de Ordenes de Venta"))
-            else:
-                raise ValidationError(
-                    _("Comunicate con el Administrador, Algo Salio Mal")
-                )
-        if  len(rec)>=1:
-            return {
-                "type": "ir.actions.client",
-                "tag": "display_notification",
-                "params": {
-                    "type": "success",
-                    "message": _("Las Ordenes Fueron Creadas."),
-                    'next': {'type': 'ir.actions.act_window_close'},
-                },
-            }
-        # if lista_produdctos_registrados:
-        #     ids_order_line = []
-        #     for id_register in lista_produdctos_registrados:
-        #         id_order_line = rec.get_data_response(xml=id_register)
-        #         ids_order_line.append(id_order_line)
-        #     if ids_order_line:
-        #         rec.state = "import_ademp"
-
-        # else:
-        #     raise ValidationError("No hay vida")
-
-        # def create_c_order_adm(self):
-        # for sku in rec.sale_order_line_ids:
-        #     dic[cont] = sku
-        #     cont += 1
-
-        #     web_service = self.env['web.service.eng'].search([])
-        #     company = self.env.company
-        #     sin = web_service.conection_url_admpiere(2)
-        #     raise ValidationError(sin)
+            if  len(rec)>=1:
+                return {
+                    "type": "ir.actions.client",
+                    "tag": "display_notification",
+                    "params": {
+                        "type": "success",
+                        "message": _("Las Ordenes Fueron Creadas."),
+                        'next': {'type': 'ir.actions.act_window_close'},
+                    },
+                }
+      
     
     def notification(self):
         msg = _("Exito, Orden de Venta Creda")
@@ -746,6 +756,7 @@ class FreightOrder(models.Model):
             # url= rec.crear_c_order_in_id.url
             
             payload = f"""
+                
                 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:adin="http://3e.pl/ADInterface">
                 <soapenv:Header/>
                 <soapenv:Body>
@@ -782,13 +793,15 @@ class FreightOrder(models.Model):
             """
             headers = {"Content-Type": "application/xml"}
             response = requests.request("POST", url, headers=headers, data=payload)
-            xml = "<?xml version='1.0' encoding='UTF-8'?>" + response.text
+            xml =  "<?xml version='1.0' encoding='UTF-8'?>" + response.text
             # raise ValidationError(response.text)
+            
             id_direction_entrega = self.get_data_response(xml=xml)
-            # raise ValidationError(id_direction_entrega)
             return id_direction_entrega[0]
     
-    def create_order_line(self, order_id, user, clave, ClientID, RoleID, OrgID, WarehouseID, url):
+    def create_order_line(
+        self, order_id, user, clave, ClientID, RoleID, OrgID, WarehouseID, url
+    ):
         lista_produdctos_registrados = []
         lista_code_pr = []
         for rec in self:
@@ -798,8 +811,11 @@ class FreightOrder(models.Model):
                 indice = codigo_producto.find(strin)
                 # lista_code_pr.append(codigo_producto[:indice])
                 producto_ad_id = rec.consul_id_product(
-                    code=codigo_producto[:indice], url=rec.crear_c_order_in_id.url
+                    code=code_product.product_template_id.default_code, url=rec.crear_c_order_in_id.url
                 )
+                # M_AttributeSetInstance_ID= rec.crear_c_order_in_id.consult_intancia_atribute_id(product_id=producto_ad_id,price_list_id='1000078',conection=rec.crear_c_order_in_id.connect_adempiere_id.code)
+                # raise ValidationError(type(M_AttributeSetInstance_ID))
+                
                 QtyEntered=code_product.product_uom_qty
                 PriceActual=code_product.price_unit
                 c_order_id = order_id[code_product.vat]
@@ -839,7 +855,6 @@ class FreightOrder(models.Model):
                                 <adin:field column="AD_OrgTrx_ID">
                                     <adin:val>{OrgID}</adin:val>
                                 </adin:field>
-
                             </adin:DataRow>
                             </adin:ModelCRUD>
                             <adin:ADLoginRequest>
@@ -861,9 +876,10 @@ class FreightOrder(models.Model):
                 headers = {"Content-Type": "application/xml"}
 
                 response = requests.request("POST", url, headers=headers, data=payload)
+                
 
                 lista_produdctos_registrados.append(response.text)
-            # raise ValidationError(response.text)
+                # raise ValidationError(response.text)
             return lista_produdctos_registrados
     def create_order_line_distribucion(
         self, order_id, user, clave, ClientID, RoleID, OrgID, WarehouseID, url
@@ -1019,8 +1035,8 @@ class FreightOrder(models.Model):
         response = requests.request("POST", url, headers=headers, data=payload)
 
         return response.text
-    def update_price_list(self, order_id, M_PriceList_ID):
-        url = "http://adempiere-qa-engine.iancarina.com.ve/ADInterface/services/ModelADService"
+    def update_price_list(self, order_id, M_PriceList_ID,url):
+        # url = "http://adempiere-qa-engine.iancarina.com.ve/ADInterface/services/ModelADService"
         payload = f"""
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:adin="http://3e.pl/ADInterface">
                 <soapenv:Header/>
@@ -1070,3 +1086,43 @@ class FreightOrder(models.Model):
             cant_entega = rec.qty_delivered
             if cant_entega <= 0 :
                 rec.qty_delivered = rec.product_uom_qty
+    def update_organization_c_orderline(self,url,id_orderline,org_id):
+       
+        if org_id == '1000009':
+            org_id ='1000009'
+        else:
+            org_id='1000052'
+        payload = f"""
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:adin="http://3e.pl/ADInterface">
+                <soapenv:Header/>
+                <soapenv:Body>
+                    <adin:updateData>
+                        <adin:ModelCRUDRequest>
+                            <adin:ModelCRUD>
+                            <adin:serviceType>UpdateAdOrgId</adin:serviceType>
+                            <adin:RecordID>{id_orderline}</adin:RecordID>
+                            <!--Optional:-->
+                            <adin:DataRow>
+                                <adin:field column="AD_Org_ID">
+                                    <adin:val>{org_id}</adin:val>
+                                </adin:field>
+                            </adin:DataRow>
+                            </adin:ModelCRUD>
+                            <adin:ADLoginRequest>
+                            <adin:user>dGarcia</adin:user>
+                            <adin:pass>dGarcia</adin:pass>
+                            <adin:lang>es_VE</adin:lang>
+                            <adin:ClientID>1000000</adin:ClientID>
+                            <adin:RoleID>1000000</adin:RoleID>
+                            <adin:OrgID>0</adin:OrgID>
+                            <adin:WarehouseID>0</adin:WarehouseID>
+                            <adin:stage>0</adin:stage>
+                            </adin:ADLoginRequest>
+                        </adin:ModelCRUDRequest>
+                        </adin:queryData>
+                    </soapenv:Body>
+                    </soapenv:Envelope>
+                """
+        headers = {"Content-Type": "application/xml"}
+        response = requests.request("POST", url, headers=headers, data=payload)
+        return response.text

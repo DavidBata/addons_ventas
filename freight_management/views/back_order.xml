@@ -66,7 +66,12 @@
             </p>
             </field>
         </record>
-      
+        <menuitem
+            id="menu_back_order_line"
+            name="Back Order"
+            action="freight_management.action_black_order"
+            parent="menu_freight_root"
+            sequence="10"/>
     
     </data>
     

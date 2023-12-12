@@ -93,6 +93,10 @@ class WebServiceEng(models.Model):
                         <adin:field column="M_Warehouse_ID">
                             <adin:val>{M_Warehouse_ID}</adin:val>
                         </adin:field>
+                        
+                          <adin:field column="AD_OrgTrx_ID">
+                            <adin:val>{OrgID}</adin:val>
+                        </adin:field>
 
                     </adin:DataRow>
                     </adin:ModelCRUD>
@@ -118,7 +122,7 @@ class WebServiceEng(models.Model):
 
         xml_unific = "<?xml version='1.0' encoding='UTF-8'?>" + response.text
         lista_data = self.get_data_response(xml=xml_unific)
-        # raise ValidationError(response.text)
+        # raise ValidationError(payload)
         return lista_data
     def dd_order_create(
         self,
@@ -244,14 +248,14 @@ class WebServiceEng(models.Model):
             for valida in dic.values():
                 lista.append(valida)
         # lista.sort()
-        # raise ValidationError(lista)
+        # raise ValidationError(response.text)
         diccio = {
             "partner": lista[0],
         }
         return diccio
 
-    def consul_user(self, ad_client=False, code=False, url=False):
-        payload = f"""<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:_0=\"http://3e.pl/ADInterface\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n     <_0:queryData>\r\n       <_0:ModelCRUDRequest>\r\n         <_0:ModelCRUD>\r\n           <_0:serviceType>ConsulUsuario</_0:serviceType>\r\n          <_0:DataRow>\r\n       <_0:field column=\"IsActive\">\r\n                        <_0:val>Y</_0:val>\r\n</_0:field>\r\n   {ad_client}                      <_0:field column=\"Value\">\r\n                        <_0:val>{code}</_0:val>\r\n            </_0:field>\r\n          </_0:DataRow>\r\n         </_0:ModelCRUD>\r\n         <_0:ADLoginRequest>\r\n           <_0:user>dGarcia</_0:user>\r\n           <_0:pass>dGarcia</_0:pass>\r\n           <_0:lang>es_VE</_0:lang>\r\n           <_0:ClientID>1000000</_0:ClientID>\r\n           <_0:RoleID>1000000</_0:RoleID>\r\n           <_0:OrgID>0</_0:OrgID>\r\n           <_0:WarehouseID>0</_0:WarehouseID>\r\n           <_0:stage>0</_0:stage>\r\n         </_0:ADLoginRequest>\r\n       </_0:ModelCRUDRequest>\r\n     </_0:queryData>\r\n   </soapenv:Body>\r\n </soapenv:Envelope>"""
+    def consul_user(self, code, url):
+        payload = f"""<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:_0=\"http://3e.pl/ADInterface\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n     <_0:queryData>\r\n       <_0:ModelCRUDRequest>\r\n         <_0:ModelCRUD>\r\n           <_0:serviceType>ConsulUsuario</_0:serviceType>\r\n          <_0:DataRow>\r\n       <_0:field column=\"IsActive\">\r\n                        <_0:val>Y</_0:val>\r\n            </_0:field>\r\n            <_0:field column=\"Value\">\r\n                        <_0:val>{code}</_0:val>\r\n            </_0:field>\r\n          </_0:DataRow>\r\n         </_0:ModelCRUD>\r\n         <_0:ADLoginRequest>\r\n           <_0:user>dGarcia</_0:user>\r\n           <_0:pass>dGarcia</_0:pass>\r\n           <_0:lang>es_VE</_0:lang>\r\n           <_0:ClientID>1000000</_0:ClientID>\r\n           <_0:RoleID>1000000</_0:RoleID>\r\n           <_0:OrgID>0</_0:OrgID>\r\n           <_0:WarehouseID>0</_0:WarehouseID>\r\n           <_0:stage>0</_0:stage>\r\n         </_0:ADLoginRequest>\r\n       </_0:ModelCRUDRequest>\r\n     </_0:queryData>\r\n   </soapenv:Body>\r\n </soapenv:Envelope>"""
         headers = {"Content-Type": "application/xml"}
 
         response = requests.request("POST", url, headers=headers, data=payload)
@@ -279,19 +283,17 @@ class WebServiceEng(models.Model):
                 lista.append(valida)
 
         lista.sort()
-        # raise ValidationError(lista)
+        # raise ValidationError(response.text)
         consul_org = self.consul_organiz_user_acc(org_acc=lista[0],url=url)
-        # raise ValidationError(consul_org)
         consul_rol = self.consul_rol_user(user_id=lista[0],url=url)
-        # raise ValidationError(consul_rol[0])
+        # raise ValidationError(consul_rol)
         org_asignado = consul_org[0]
         consul_alma = self.consul_almacen_user(org_id=org_asignado,url=url)
         consul_alma.sort()
         # raise ValidationError(consul_alma)
 
+        # raise ValidationError(consul_tipodc)
         # print(lista)
-        # raise ValidationError(consul_rol[0])
-        
         diccio = {
             "almacen": consul_alma[0],
             "rol_id": consul_rol[0],
@@ -300,8 +302,7 @@ class WebServiceEng(models.Model):
             "name": lista[1],
             "value": lista[2],
         }
-        # raise ValidationError(diccio.values())
-        
+
         return diccio
 
     def consul_organiz_user_acc(self, org_acc, url):
@@ -332,7 +333,7 @@ class WebServiceEng(models.Model):
 
             for valida in dic.values():
                 lista.append(valida)
-        
+
         return lista
 
     def consul_rol_user(self, user_id, url):
@@ -343,7 +344,6 @@ class WebServiceEng(models.Model):
 
         xml = "<?xml version='1.0' encoding='UTF-8'?>" + response.text
         rol_user = self.get_data_response(xml=xml)
-        # raise ValidationError( response.text)
         return rol_user
 
     def consul_almacen_user(self, org_id,url):
@@ -659,8 +659,51 @@ class WebServiceEng(models.Model):
         response = requests.request("POST", url, headers=headers, data=payload)
 
         return response.text
+    def org_cliente_despacho(self,org_name,url):
 
-    def create_order_line(self, order_id, user, clave, ClientID, RoleID, OrgID, WarehouseID, url, producto_ad_id,QtyEntered,PriceEntered,PriceActual):
+        # url = "http://adempiere-engine.iancarina.com.ve/ADInterface/services/ModelADService"
+        payload = f"""<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:_0=\"http://3e.pl/ADInterface\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n     <_0:queryData>\r\n       <_0:ModelCRUDRequest>\r\n         <_0:ModelCRUD>\r\n           <_0:serviceType>consul_organiz_user_acc</_0:serviceType>\r\n          <_0:DataRow>\r\n <_0:field column=\"IsSummary\">\r\n                        <_0:val>N</_0:val>\r\n            </_0:field>\r\n   <_0:field column=\"IsActive\">\r\n                        <_0:val>Y</_0:val>\r\n            </_0:field>\r\n            <_0:field column=\"Name\">\r\n                        <_0:val>{org_name}</_0:val>\r\n            </_0:field>\r\n          </_0:DataRow>\r\n         </_0:ModelCRUD>\r\n         <_0:ADLoginRequest>\r\n           <_0:user>dGarcia</_0:user>\r\n           <_0:pass>dGarcia</_0:pass>\r\n           <_0:lang>es_VE</_0:lang>\r\n           <_0:ClientID>1000000</_0:ClientID>\r\n           <_0:RoleID>1000000</_0:RoleID>\r\n           <_0:OrgID>0</_0:OrgID>\r\n           <_0:WarehouseID>0</_0:WarehouseID>\r\n           <_0:stage>0</_0:stage>\r\n         </_0:ADLoginRequest>\r\n       </_0:ModelCRUDRequest>\r\n     </_0:queryData>\r\n   </soapenv:Body>\r\n </soapenv:Envelope>"""
+        headers = {"Content-Type": "application/xml"}
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        xml = "<?xml version='1.0' encoding='UTF-8'?>" + response.text
+
+        doc_xml = El.fromstring(xml)
+        doc_xml.items()
+        # print(doc_xml.iter)
+        data_cbpart = []
+        dic = {}
+        cont = 0
+        for x in doc_xml.iter():
+            # print(x.attrib)
+            if x.attrib and len(x.attrib) <= 2:
+                data_cbpart.append(x.attrib)
+            cont = 0
+            lista = []
+        for part in data_cbpart:
+            for cont, value in part.items():
+                dic = {
+                    cont: value,
+                }
+
+            for valida in dic.values():
+                lista.append(valida)
+        # raise ValidationError(response.text) 
+        return lista
+
+    def consult_typedocumet_base(self, name,url):
+        # url = "http://adempiere-engine.iancarina.com.ve/ADInterface/services/ModelADService"
+
+        payload = f"""<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:_0=\"http://3e.pl/ADInterface\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n     <_0:queryData>\r\n       <_0:ModelCRUDRequest>\r\n         <_0:ModelCRUD>\r\n           <_0:serviceType>TypeDocumentBase</_0:serviceType>\r\n          <_0:DataRow>\r\n            <_0:field column=\"Name\">\r\n                        <_0:val>{name}</_0:val>\r\n            </_0:field>\r\n          </_0:DataRow>\r\n         </_0:ModelCRUD>\r\n         <_0:ADLoginRequest>\r\n           <_0:user>dGarcia</_0:user>\r\n           <_0:pass>dGarcia</_0:pass>\r\n           <_0:lang>es_VE</_0:lang>\r\n           <_0:ClientID>1000000</_0:ClientID>\r\n           <_0:RoleID>1000000</_0:RoleID>\r\n           <_0:OrgID>0</_0:OrgID>\r\n           <_0:WarehouseID>0</_0:WarehouseID>\r\n           <_0:stage>0</_0:stage>\r\n         </_0:ADLoginRequest>\r\n       </_0:ModelCRUDRequest>\r\n     </_0:queryData>\r\n   </soapenv:Body>\r\n </soapenv:Envelope>"""
+        headers = {"Content-Type": "application/xml"}
+        response = requests.request("POST", url, headers=headers, data=payload)
+        xml = "<?xml version='1.0' encoding='UTF-8'?>" + response.text
+        typebase = self.env["freight.order"].get_data_response(xml=xml)
+        # raise ValidationError(typebase)        
+        return typebase
+
+    def create_order_line_salesperson(self, order_id, user, clave, ClientID, RoleID, OrgID, WarehouseID, url, producto_ad_id,QtyEntered,PriceEntered,PriceActual):
         lista_produdctos_registrados = []
         
         payload = f"""

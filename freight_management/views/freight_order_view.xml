@@ -61,7 +61,7 @@
                     <group>
                         <group>
                             <field name="truck_id" />
-                            <field name="crear_c_order_in_id" required="1" no_create="1" no_edit="1" no_open="1"/> 
+                            <field name="crear_c_order_in_id" no_create="1" no_edit="1" no_open="1"/> 
                             <!-- <field name="sale_order_id"/> -->
                             <field name="is_opl"/>
                             <field name="tipo_document_opl" attrs="{'invisible': [('is_opl', '=', False)],'required':[('is_opl','=',True)]}"/>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="inherit_web_service_eng_form" model="ir.ui.view">
+        <field name="name">web.service.eng.view.form.inherit</field>
+        <field name="model">web.service.eng</field>
+        <field name="inherit_id" ref="freight_management.web_service_eng_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+
+                    <button name="botonnn" class="btn btn-success" type="object" string="BOTON PRUEBA"/>
+                </header>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="before">
+                <field name="connect_adempiere_id"></field>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -7,6 +7,7 @@ from . import product_template
 from . import web_service
 from . import back_order
 from .import organizacion
+from .import c_doctype
 
 # from . import user
 # from . import web_service_admpiere

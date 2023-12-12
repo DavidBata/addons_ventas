@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="inherit_view_form_freight_order" model="ir.ui.view">
+        <field name="name">freight.order.view.form</field>
+        <field name="model">freight.order</field>
+        <field name="inherit_id" ref="freight_management.freight_order_form_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='confirmar_freight']" position="after">
+                <button name="export_other_companies"  string="Pruba Otras empresas" type="object" class="oe_highlight"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

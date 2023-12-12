@@ -50,6 +50,9 @@ class OrderLineFreight(models.Model):
         related="order_id.delivery_address_id", store=True, string="Direc Entrega"
     )
 
+    delivery_address = fields.Char(
+        related="order_id.partner_id.city", store=True, string="Direc Entrega"
+    )
     price_unit_limite = fields.Float(
         string="Precio Limite", related="product_template_id.list_price_limit"
     )
@@ -82,7 +85,7 @@ class OrderLineFreight(models.Model):
         related="freight_order_id.date_upload", string=" Fecha de Carga", default=False
     )
     costo_unit = fields.Float(
-        related="product_template_id.standard_price", store=True, string="precion Unitario"
+        string="Precio Unitario"
     )
     document_type = fields.Char(related='order_id.name_document', store=True)
     
@@ -101,8 +104,9 @@ class OrderLineFreight(models.Model):
         comodel_name='back.order',
         ondelete='restrict',
     )
+
     unidad_bulto = fields.Integer(
-        string='Unidad Por Bulto', related='product_id.unidad_bulto'
+        string='Unidad Por Bulto', related='product_id.unidad_bulto', store=True
     )
 
     
@@ -143,22 +147,21 @@ class OrderLineFreight(models.Model):
             record.weight_total_line = record.product_uom_qty * record.product_weight
     
 
+    # Calcular Precio Unitario en linea de Pedido
 
-
-
-
-    # @api.onchange('order_line')
-    # def onchange_order_line_field(self):
-    #     for record in self:
-    #         for line in record.order_line :
-    #             nombre_producto = line.product_template_id.name
-    #             unidadades_medida=re.search(r"[0-9]\d*[X|x][0-9]\d*",nombre_producto)
-    #             indice_inicio=unidadades_medida.start()
-    #             unidades_bulto=nombre_producto[indice_inicio:indice_inicio+2]
-    #             line.costo_unit= line.price_unit/int(unidades_bulto)
-    
-    
-
+    @api.onchange('product_id','price_unit')
+    def _onchange_price_unit(self):
+        for rec in self:
+            if rec.product_id:
+                rec.costo_unit=rec.price_unit/rec.product_id.unidad_bulto
+      
+        
+        # for record in self:
+        #     nombre_producto = record.product_template_id.name
+        #     unidadades_medida=re.search(r"[0-9]\d*[X|x][0-9]\d*",nombre_producto)
+        #     indice_inicio=unidadades_medida.start()
+        #     unidades_bulto=nombre_producto[indice_inicio:indice_inicio+2]
+        #     record.costo_unit= record.price_unit/int(unidades_bulto)
     
         
     
